@@ -33,11 +33,14 @@ def _format_course(course):
             ge_text = ge_text[:-1]
         if ge_text.endswith(')'):
             ge_text = ge_text[:-1]
+        if ge_text.endswith('.'):
+            ge_text = ge_text[:-1]
         return ge_text
 
     return {
         'courseCode': course['id'],
         'courseTitle': course['title'],
+        'units': course['maxUnits'],
         'geCategories': format_ge_categories(course['geText']),
         'description': course['description'],
     }

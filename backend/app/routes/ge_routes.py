@@ -23,10 +23,22 @@ VALID_GE_CATEGORIES = {
 
 def _format_course(course):
     """Helper to format a course object"""
+    def format_ge_categories(ge_text):
+        if not ge_text.strip():
+            return ''
+        ge_text = ge_text.strip()
+        if ge_text.startswith('('):
+            ge_text = ge_text[1:]
+        if ge_text.endswith('.'):
+            ge_text = ge_text[:-1]
+        if ge_text.endswith(')'):
+            ge_text = ge_text[:-1]
+        return ge_text
+
     return {
         'courseCode': course['id'],
         'courseTitle': course['title'],
-        'geCategories': course['geText'][1:-1] if len(course['geText']) > 2 else '',
+        'geCategories': format_ge_categories(course['geText']),
         'description': course['description'],
     }
 
@@ -189,3 +201,22 @@ def get_ge_courses():
         return jsonify({'error': str(e)}), 503
     except Exception:
         return jsonify({'error': 'An unexpected error occurred'}), 500
+
+
+@ge_bp.route('/clear-cache', methods=['POST'])
+def clear_cache():
+    """Clear cache (development only)"""
+    from flask import current_app
+
+    if not current_app.debug:
+        return jsonify({'error': 'This endpoint is only available in development mode'}), 403
+
+    category = request.args.get('category', None)
+
+    if category:
+        _delete_associated_intersection_caches(category)
+        cache.delete_memoized(_fetch_all_category_ge_courses, category)
+        return jsonify({'message': f'Cache cleared for {category}'}), 200
+    else:
+        cache.clear()
+        return jsonify({'message': 'All caches cleared'}), 200

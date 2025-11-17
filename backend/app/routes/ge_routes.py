@@ -57,6 +57,16 @@ def _delete_associated_intersection_caches(ge_category):
         redis_client.delete(key)
 
 
+def _is_current_course(unformatted_course):
+    """Check if a course is currently offered based on recent quarters offered."""
+    terms = unformatted_course.get('terms', [])
+    current_years = {'2024', '2025'}
+    for term in terms:
+        if term.strip()[:4] in current_years:
+            return True
+    return False
+
+
 @cache.memoize(timeout=604800)  # 7 days
 def _fetch_all_category_ge_courses(ge_category):
     """Fetch all courses (formatted) for a GE category using cursor pagination; pass 'ALL' to fetch all GE categories"""
@@ -95,7 +105,9 @@ def _fetch_all_category_ge_courses(ge_category):
         except (KeyError, ValueError) as e:
             raise RuntimeError(f'Invalid response format from AnteaterAPI: {str(e)}')
 
-        all_category_courses.extend(data['items'])
+        # Filter to current courses immediately, don't store historical ones
+        current_courses = [c for c in data['items'] if _is_current_course(c)]
+        all_category_courses.extend(current_courses)
 
         cursor = data.get('nextCursor')
         if not cursor:

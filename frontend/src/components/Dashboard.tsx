@@ -71,7 +71,7 @@ export default function Dashboard() {
       </div>
 
       {/* Content area with consistent padding */}
-      <div className="flex-grow flex flex-col items-center p-[50px] overflow-hidden">
+      <div className="flex-grow flex flex-col items-center p-[30px] overflow-hidden">
         {/* Table Container */}
         <div className="flex-grow bg-white dark:bg-gray-800 border border-[#ececec] dark:border-[#4e5562] w-full rounded-[10px] flex flex-col overflow-hidden">
           {/* Search Bar */}

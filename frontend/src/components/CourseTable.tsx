@@ -194,9 +194,20 @@ export default function CourseTable({ courses, isLoading, error }: CourseTablePr
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[#ebebeb] dark:border-gray-600 h-[22px] shrink-0 flex items-center px-[25px]">
-        <p className="font-inter font-normal text-[12px] text-[#aaaaaa] dark:text-gray-400">
-          Showing {courses.length} {courses.length === 1 ? 'course' : 'courses'}
+      <div className="border-t border-[#ebebeb] dark:border-gray-600 h-[22px] shrink-0 flex items-center justify-between px-[25px]">
+        <p className="font-inter font-normal text-[14px] text-[#aaaaaa] dark:text-gray-400">
+          Showing {courses.length} {courses.length === 1 ? 'result' : 'results'}
+        </p>
+        <p className="font-inter font-normal text-[14px] text-[#aaaaaa] dark:text-gray-400">
+          Data from{' '}
+          <a
+            href="https://icssc.link/about-anteaterapi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-[#888888] dark:hover:text-gray-300"
+          >
+            Anteater API
+          </a>
         </p>
       </div>
     </div>

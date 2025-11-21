@@ -1,5 +1,4 @@
 import os
-import ssl
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -24,12 +23,9 @@ class Config:
     RATELIMIT_STORAGE_OPTIONS = {'socket_connect_timeout': 5}
 
     if _is_rediss:
-        RATELIMIT_STORAGE_OPTIONS['ssl_cert_reqs'] = ssl.CERT_NONE
-        # Create SSL context for Flask-Caching
-        _ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        _ssl_context.check_hostname = False
-        _ssl_context.verify_mode = ssl.CERT_NONE
-        CACHE_OPTIONS = {'ssl': _ssl_context}
+        # Heroku Redis uses self-signed certs, disable verification
+        RATELIMIT_STORAGE_OPTIONS['ssl_cert_reqs'] = None
+        CACHE_OPTIONS = {'ssl_cert_reqs': None}
 
     RATELIMIT_STRATEGY = os.environ.get('RATELIMIT_STRATEGY', "fixed-window")
 

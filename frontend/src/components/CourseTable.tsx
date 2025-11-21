@@ -1,138 +1,134 @@
-import type { Course } from '../types/api';
-import CourseRow from './CourseRow';
+import type { Course } from '../types/course';
+import SortArrows from '../icons/SortArrows';
 
 interface CourseTableProps {
   courses: Course[];
-  loading: boolean;
+  isLoading: boolean;
+  onLoadMore?: () => void;
+  hasMore: boolean;
 }
 
-const CourseTable = ({ courses, loading }: CourseTableProps) => {
-  if (loading && courses.length === 0) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="loading loading-spinner loading-lg text-primary"></div>
-      </div>
-    );
-  }
-
-  if (courses.length === 0) {
-    return (
-      <div className="text-center py-12 text-base-content/60">
-        No courses found. Try adjusting your filters.
-      </div>
-    );
-  }
-
+export default function CourseTable({ courses, isLoading, onLoadMore, hasMore }: CourseTableProps) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead className="bg-base-200">
-          <tr>
-            <th className="py-3 px-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-300 transition-colors group">
-              <div className="flex items-center gap-2">
-                Course Code
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                  />
-                </svg>
+    <div className="flex flex-col overflow-hidden w-full h-full">
+      {/* Table Headers */}
+      <div
+        className="bg-[#f8f8f8] dark:bg-gray-700 border-b border-[#ebebeb] dark:border-gray-600 h-[53px] shrink-0"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '173px 276px 115px 189px 1fr',
+        }}
+      >
+        <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+          <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
+            Course Code
+          </p>
+          <div className="flex-grow" />
+          <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+        </div>
+
+        <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+          <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
+            Course Title
+          </p>
+          <div className="flex-grow" />
+          <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+        </div>
+
+        <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+          <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
+            Units
+          </p>
+          <div className="flex-grow" />
+          <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+        </div>
+
+        <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+          <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
+            GE Categories
+          </p>
+          <div className="flex-grow" />
+          <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+        </div>
+
+        <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+          <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
+            Description
+          </p>
+          <div className="flex-grow" />
+          <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+        </div>
+      </div>
+
+      {/* Course List */}
+      <div className="flex-1 overflow-y-auto">
+        {isLoading && courses.length === 0 ? (
+          <div className="flex items-center justify-center py-20">
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Loading courses...</p>
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="flex items-center justify-center py-20">
+            <p className="text-gray-500 dark:text-gray-400 text-lg">
+              Select GE categories to find courses
+            </p>
+          </div>
+        ) : (
+          <>
+            {courses.map((course, index) => (
+              <div
+                key={`${course.courseCode}-${index}`}
+                className="border-b border-[#ebebeb] dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '173px 276px 115px 189px 1fr',
+                }}
+              >
+                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                  <p className="font-inter font-medium text-[14px] leading-5 text-black dark:text-white">
+                    {course.courseCode}
+                  </p>
+                </div>
+
+                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                  <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
+                    {course.courseTitle}
+                  </p>
+                </div>
+
+                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                  <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
+                    {course.units}
+                  </p>
+                </div>
+
+                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                  <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
+                    {course.geCategories}
+                  </p>
+                </div>
+
+                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                  <p className="font-inter text-[14px] leading-5 text-black dark:text-white line-clamp-3">
+                    {course.description}
+                  </p>
+                </div>
               </div>
-            </th>
-            <th className="py-3 px-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-300 transition-colors group">
-              <div className="flex items-center gap-2">
-                Title
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity"
+            ))}
+
+            {hasMore && (
+              <div className="flex items-center justify-center py-8">
+                <button
+                  onClick={onLoadMore}
+                  disabled={isLoading}
+                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                  />
-                </svg>
+                  {isLoading ? 'Loading...' : 'Load More'}
+                </button>
               </div>
-            </th>
-            <th className="py-3 px-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-300 transition-colors group">
-              <div className="flex items-center gap-2">
-                Units
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                  />
-                </svg>
-              </div>
-            </th>
-            <th className="py-3 px-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-300 transition-colors group">
-              <div className="flex items-center gap-2">
-                GE Categories
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                  />
-                </svg>
-              </div>
-            </th>
-            <th className="py-3 px-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-300 transition-colors group">
-              <div className="flex items-center gap-2">
-                Description
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                  />
-                </svg>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {courses.map((course, index) => (
-            <CourseRow key={`${course.courseCode}-${index}`} course={course} />
-          ))}
-        </tbody>
-      </table>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
-};
-
-export default CourseTable;
+}

@@ -1,28 +1,32 @@
-import axios from 'axios';
-import type { CoursesResponse, GEFilterParams } from '../types/api';
+import type { CoursesResponse, GECategory } from '../types/course';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+interface FetchCoursesParams {
+  filter1?: GECategory | null;
+  filter2?: GECategory | null;
+  cursor?: string | null;
+  take?: number;
+}
 
-export const getCourses = async (params: GEFilterParams): Promise<CoursesResponse> => {
-  const queryParams = new URLSearchParams();
+export async function fetchCourses({
+  filter1 = null,
+  filter2 = null,
+  cursor = null,
+  take = 100,
+}: FetchCoursesParams = {}): Promise<CoursesResponse> {
+  const params = new URLSearchParams();
 
-  if (params.category1) queryParams.append('filter1', params.category1);
-  if (params.category2) queryParams.append('filter2', params.category2);
-  if (params.take) queryParams.append('take', params.take.toString());
-  if (params.cursor) queryParams.append('cursor', params.cursor);
+  if (filter1) params.append('filter1', filter1);
+  if (filter2) params.append('filter2', filter2);
+  if (cursor) params.append('cursor', cursor);
+  params.append('take', take.toString());
 
-  const response = await apiClient.get<CoursesResponse>(`/api/ge-courses?${queryParams.toString()}`);
-  return response.data;
-};
+  const response = await fetch(`${API_BASE_URL}/api/ge-courses?${params.toString()}`);
 
-export const healthCheck = async (): Promise<{ status: string }> => {
-  const response = await apiClient.get('/health');
-  return response.data;
-};
+  if (!response.ok) {
+    throw new Error('Failed to fetch courses');
+  }
+
+  return response.json();
+}

@@ -23,6 +23,10 @@ VALID_GE_CATEGORIES = {
 
 def _format_course(course):
     """Helper to format a course object"""
+
+    def _format_course_code(course):
+        return f"{course['department']} {course['courseNumber']}"
+
     def format_ge_categories(ge_text):
         if not ge_text.strip():
             return ''
@@ -38,7 +42,7 @@ def _format_course(course):
         return ge_text
 
     return {
-        'courseCode': course['id'],
+        'courseCode': _format_course_code(course),
         'courseTitle': course['title'],
         'units': course['maxUnits'],
         'geCategories': format_ge_categories(course['geText']),
@@ -58,7 +62,7 @@ def _delete_associated_intersection_caches(ge_category):
 
 
 def _is_current_course(unformatted_course):
-    """Check if a course is currently offered based on recent quarters offered."""
+    """Check if a course is currently offered based on recent years offered."""
     terms = unformatted_course.get('terms', [])
     current_years = {'2024', '2025'}
     for term in terms:
@@ -69,7 +73,7 @@ def _is_current_course(unformatted_course):
 
 @cache.memoize(timeout=604800)  # 7 days
 def _fetch_all_category_ge_courses(ge_category):
-    """Fetch all courses (formatted) for a GE category using cursor pagination; pass 'ALL' to fetch all GE categories"""
+    """Fetch all courses (formatted) for a GE category; pass 'ALL' to fetch all GE categories"""
     if ge_category == 'ALL':
         sorted_ge_categories = sorted(VALID_GE_CATEGORIES)
         seen_codes = set()
@@ -105,7 +109,6 @@ def _fetch_all_category_ge_courses(ge_category):
         except (KeyError, ValueError) as e:
             raise RuntimeError(f'Invalid response format from AnteaterAPI: {str(e)}')
 
-        # Filter to current courses immediately, don't store historical ones
         current_courses = [c for c in data['items'] if _is_current_course(c)]
         all_category_courses.extend(current_courses)
 
@@ -118,7 +121,7 @@ def _fetch_all_category_ge_courses(ge_category):
     # if any single category is updated, delete cache for All
     cache.delete_memoized(_fetch_all_category_ge_courses, 'ALL')
 
-    # if any single category is updated, dete intersection calculation caches involving it
+    # if any single category is updated, delete intersection calculation caches involving it
     _delete_associated_intersection_caches(ge_category)
 
     return formatted_category_courses
@@ -151,67 +154,31 @@ def _get_all_ge_intersection(filter1, filter2):
     return intersection_courses
 
 
-def _get_courses_by_cursor(formatted_courses, cursor=None, take=100):
-    """Get a subset of courses based on cursor"""
-
-    if not cursor:
-        start_index = 0
-    else:
-        start_index = None
-        for i, course in enumerate(formatted_courses):
-            if course['courseCode'] == cursor:
-                start_index = i
-                break
-
-        if start_index is None:
-            raise ValueError(f'Invalid cursor: {cursor} not found in results')
-
-    end_index = start_index + take
-    courses_page = formatted_courses[start_index:end_index]
-
-    next_cursor = None
-    if end_index < len(formatted_courses):
-        next_cursor = formatted_courses[end_index]['courseCode']
-
-    return courses_page, next_cursor
-
-
 @ge_bp.route('/ge-courses', methods=['GET'])
 def get_ge_courses():
-    """Get courses that satisfy one or multiple GE categories with pagination; if no filters, return all GE courses"""
+    """Get courses that satisfy one or multiple GE categories; if no filters, return all GE courses"""
 
     filter1 = request.args.get('filter1', '').strip().upper() or None
     filter2 = request.args.get('filter2', '').strip().upper() or None
-    cursor = request.args.get('cursor', None)
-    take = request.args.get('take', 100, type=int)
 
-    if take <= 0 or take > 100:
-        return jsonify({'error': 'Invalid take value. Must be between 1 and 100.'}), 400
-
-    if filter1 and filter1 not in VALID_GE_CATEGORIES and filter1 != 'ALL':
+    if filter1 and filter1 not in VALID_GE_CATEGORIES:
         return jsonify({'error': f'Invalid filter1 value: {filter1}'}), 400
-    if filter2 and filter2 not in VALID_GE_CATEGORIES and filter2 != 'ALL':
+    if filter2 and filter2 not in VALID_GE_CATEGORIES:
         return jsonify({'error': f'Invalid filter2 value: {filter2}'}), 400
 
     try:
         if filter1 and filter2:
+            if filter1 == filter2:
+                category_courses = _fetch_all_category_ge_courses(filter1)
+                return jsonify({'courses': category_courses}), 200
             intersection_courses = _get_all_ge_intersection(filter1, filter2)
-            courses, next_cursor = _get_courses_by_cursor(
-                intersection_courses, cursor, take
-            )
-            return jsonify({'courses': courses, 'nextCursor': next_cursor}), 200
+            return jsonify({'courses': intersection_courses}), 200
         elif filter1 or filter2:
             category_courses = _fetch_all_category_ge_courses(filter1 or filter2)
-            courses, next_cursor = _get_courses_by_cursor(
-                category_courses, cursor, take
-            )
-            return jsonify({'courses': courses, 'nextCursor': next_cursor}), 200
+            return jsonify({'courses': category_courses}), 200
         else:
             all_ge_courses = _fetch_all_category_ge_courses('ALL')
-            courses, next_cursor = _get_courses_by_cursor(all_ge_courses, cursor, take)
-            return jsonify({'courses': courses, 'nextCursor': next_cursor}), 200
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+            return jsonify({'courses': all_ge_courses}), 200
     except RuntimeError as e:
         return jsonify({'error': str(e)}), 503
     except Exception:

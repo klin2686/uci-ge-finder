@@ -11,7 +11,7 @@ class Config:
     """Base configuration class"""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-    REDIS_URL = os.environ.get('CACHE_REDIS_URL', 'redis://localhost:6379')
+    REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 
     CACHE_TYPE = os.environ.get('CACHE_TYPE', 'RedisCache')
     CACHE_DEFAULT_TIMEOUT = int(os.environ.get('CACHE_DEFAULT_TIMEOUT', 300))

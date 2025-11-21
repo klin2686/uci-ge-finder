@@ -18,11 +18,11 @@ class Config:
     CACHE_TYPE = os.environ.get('CACHE_TYPE', 'RedisCache')
     CACHE_DEFAULT_TIMEOUT = int(os.environ.get('CACHE_DEFAULT_TIMEOUT', 300))
     if CACHE_TYPE == 'RedisCache':
-        cache_redis_url = f'{REDIS_URL}/0'
-        ssl_options = {}
-        if cache_redis_url and cache_redis_url.startswith('rediss://'):
-            ssl_options = {'ssl_cert_reqs': None}
-        CACHE_REDIS = redis.from_url(cache_redis_url, **ssl_options)
+        _cache_redis_url = f'{REDIS_URL}/0'
+        _ssl_options: dict[str, Any] = {}
+        if _cache_redis_url.startswith('rediss://'):
+            _ssl_options = {'ssl_cert_reqs': None}
+        CACHE_REDIS_HOST = redis.from_url(_cache_redis_url, **_ssl_options)
 
     RATELIMIT_STORAGE_URI = f'{REDIS_URL}/1'
     RATELIMIT_STORAGE_OPTIONS: dict[str, Any] = {'socket_connect_timeout': 5}

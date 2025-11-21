@@ -19,7 +19,7 @@ def create_app(config_name=None):
     limiter.init_app(app)
 
     from app import extensions
-    extensions.redis_client = app.config['CACHE_REDIS']
+    extensions.redis_client = app.config.get('CACHE_REDIS_HOST')
 
     from app.routes import register_blueprints
     register_blueprints(app)

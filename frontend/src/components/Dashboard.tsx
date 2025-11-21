@@ -18,11 +18,6 @@ export default function Dashboard() {
   // Fetch courses when filters change
   useEffect(() => {
     const loadCourses = async () => {
-      if (!filter1 && !filter2) {
-        setCourses([]);
-        return;
-      }
-
       setIsLoading(true);
       try {
         const data = await fetchCourses({ filter1, filter2 });
@@ -72,26 +67,27 @@ export default function Dashboard() {
         {/* Table Container */}
         <div className="flex-grow bg-white dark:bg-gray-800 border border-[#ececec] dark:border-[#4e5562] w-full rounded-[10px] flex flex-col overflow-hidden">
           {/* Search Bar */}
-          <div className="border-b border-[#ebebeb] dark:border-gray-600 box-border flex gap-[30px] h-[80px] items-center justify-center px-[30px] py-5 w-full shrink-0">
-            <SearchIcon className="text-[#aaaaaa] dark:text-gray-400" />
+          <div className="border-b border-[#ebebeb] dark:border-gray-600 box-border flex gap-4 h-[80px] items-center px-[30px] py-5 w-full shrink-0">
+            <SearchIcon className="shrink-0 text-[#aaaaaa] dark:text-gray-400 hidden md:block" />
             <input
               type="text"
               placeholder="Search Courses"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="font-inter text-[20px] text-black dark:text-white placeholder:text-[#aaaaaa] dark:placeholder:text-gray-400 bg-transparent outline-none flex-shrink"
+              className="font-inter text-[20px] text-black dark:text-white placeholder:text-[#aaaaaa] dark:placeholder:text-gray-400 bg-transparent outline-none min-w-0 flex-1"
             />
-            <div className="flex-grow" />
-            <GESelector
-              value={filter1}
-              onChange={setFilter1}
-              placeholder="Select GE Category"
-            />
-            <GESelector
-              value={filter2}
-              onChange={setFilter2}
-              placeholder="Select GE Category"
-            />
+            <div className="flex gap-4 shrink min-w-0">
+              <GESelector
+                value={filter1}
+                onChange={setFilter1}
+                placeholder="Select GE Category"
+              />
+              <GESelector
+                value={filter2}
+                onChange={setFilter2}
+                placeholder="Select GE Category"
+              />
+            </div>
           </div>
 
           {/* Course Table */}

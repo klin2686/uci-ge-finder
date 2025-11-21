@@ -36,14 +36,14 @@ export default function GESelector({ value, onChange, placeholder = 'Select GE C
   };
 
   return (
-    <div ref={dropdownRef} className="relative w-[300px]">
+    <div ref={dropdownRef} className="relative w-[220px]">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full bg-white dark:bg-gray-800 border border-[#d5d7da] dark:border-gray-600 rounded-lg px-3.5 py-2.5 flex items-center justify-between gap-2 ${
           isOpen ? 'ring-2 ring-blue-500' : ''
         }`}
       >
-        <span className={`text-sm font-medium ${value ? 'text-black dark:text-white' : 'text-[#717680]'}`}>
+        <span className={`text-sm font-medium truncate ${value ? 'text-black dark:text-white' : 'text-[#717680]'}`}>
           {value ? GE_CATEGORY_LABELS[value] : placeholder}
         </span>
         <ChevronDown className={`shrink-0 transition-transform text-[#717680] ${isOpen ? 'rotate-180' : ''}`} />

@@ -57,7 +57,7 @@ export default function Dashboard() {
       <div className="bg-white dark:bg-gray-800 border-b-2 border-[#ebebeb] dark:border-gray-700 h-[60px] w-full shrink-0">
         <div className="flex gap-2.5 h-[60px] items-center justify-center px-[50px] py-2.5 w-full">
           <p className="font-inter font-semibold text-[24px] text-black dark:text-white">
-            UCI GE Overlap Finder
+            UCI GE Finder
           </p>
           <div className="flex-grow" />
           <button

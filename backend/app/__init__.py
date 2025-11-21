@@ -4,7 +4,7 @@ import redis
 from flask import Flask
 
 from app.config import config
-from app.extensions import cache, cors
+from app.extensions import cache, cors, limiter
 
 
 def create_app(config_name=None):
@@ -15,18 +15,16 @@ def create_app(config_name=None):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
-    # Initialize extensions
     cors.init_app(app)
     cache.init_app(app)
+    limiter.init_app(app)
 
-    # Initialize Redis client
     from app import extensions
     extensions.redis_client = redis.from_url(
         app.config['CACHE_REDIS_URL'],
         decode_responses=True
     )
 
-    # Register blueprints
     from app.routes import register_blueprints
     register_blueprints(app)
 

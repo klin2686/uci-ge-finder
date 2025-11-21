@@ -10,9 +10,16 @@ load_dotenv(basedir / '.env')
 class Config:
     """Base configuration class"""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+    REDIS_URL = os.environ.get('CACHE_REDIS_URL', 'redis://localhost:6379')
+
     CACHE_TYPE = os.environ.get('CACHE_TYPE', 'RedisCache')
     CACHE_DEFAULT_TIMEOUT = int(os.environ.get('CACHE_DEFAULT_TIMEOUT', 300))
-    CACHE_REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+    CACHE_REDIS_URL = f'{REDIS_URL}/0' if CACHE_TYPE == 'RedisCache' else None
+
+    RATELIMIT_STORAGE_URI = f'{REDIS_URL}/1'
+    RATELIMIT_STORAGE_OPTIONS = {"socket_connect_timeout": 5}
+    RATELIMIT_STRATEGY = os.environ.get('RATELIMIT_STRATEGY', "fixed-window")
 
 
 class DevelopmentConfig(Config):

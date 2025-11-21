@@ -2,7 +2,7 @@ import requests
 from flask import Blueprint, jsonify, request
 from requests.exceptions import RequestException, Timeout
 
-from app.extensions import cache, redis_client
+from app.extensions import cache, limiter, redis_client
 
 ge_bp = Blueprint('ge', __name__)
 
@@ -19,6 +19,58 @@ VALID_GE_CATEGORIES = {
     'GE-7',
     'GE-8',
 }
+
+
+@ge_bp.route('/ge-courses', methods=['GET'])
+@limiter.limit('3/second;30/minute')
+def get_ge_courses():
+    """Get courses that satisfy one or multiple GE categories; if no filters, return all GE courses"""
+
+    filter1 = request.args.get('filter1', '').strip().upper() or None
+    filter2 = request.args.get('filter2', '').strip().upper() or None
+
+    if filter1 and filter1 not in VALID_GE_CATEGORIES:
+        return jsonify({'error': f'Invalid filter1 value: {filter1}'}), 400
+    if filter2 and filter2 not in VALID_GE_CATEGORIES:
+        return jsonify({'error': f'Invalid filter2 value: {filter2}'}), 400
+
+    try:
+        if filter1 and filter2:
+            if filter1 == filter2:
+                category_courses = _fetch_all_category_ge_courses(filter1)
+                return jsonify({'courses': category_courses}), 200
+            intersection_courses = _get_all_ge_intersection(filter1, filter2)
+            return jsonify({'courses': intersection_courses}), 200
+        elif filter1 or filter2:
+            category_courses = _fetch_all_category_ge_courses(filter1 or filter2)
+            return jsonify({'courses': category_courses}), 200
+        else:
+            all_ge_courses = _fetch_all_category_ge_courses('ALL')
+            return jsonify({'courses': all_ge_courses}), 200
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception:
+        return jsonify({'error': 'An unexpected error occurred'}), 500
+
+
+@ge_bp.route('/clear-cache', methods=['POST'])
+def clear_cache():
+    """Clear cache (development only)"""
+    from flask import current_app
+
+    if not current_app.debug:
+        return jsonify({'error': 'This endpoint is only available in development mode'}), 403
+
+    category = request.args.get('category', None)
+
+    if category:
+        _delete_associated_intersection_caches(category)
+        cache.delete_memoized(_fetch_all_category_ge_courses, category)
+        return jsonify({'message': f'Cache cleared for {category}'}), 200
+    else:
+        cache.clear()
+        return jsonify({'message': 'All caches cleared'}), 200
+
 
 
 def _format_course(course):
@@ -152,53 +204,3 @@ def _get_all_ge_intersection(filter1, filter2):
     ]
 
     return intersection_courses
-
-
-@ge_bp.route('/ge-courses', methods=['GET'])
-def get_ge_courses():
-    """Get courses that satisfy one or multiple GE categories; if no filters, return all GE courses"""
-
-    filter1 = request.args.get('filter1', '').strip().upper() or None
-    filter2 = request.args.get('filter2', '').strip().upper() or None
-
-    if filter1 and filter1 not in VALID_GE_CATEGORIES:
-        return jsonify({'error': f'Invalid filter1 value: {filter1}'}), 400
-    if filter2 and filter2 not in VALID_GE_CATEGORIES:
-        return jsonify({'error': f'Invalid filter2 value: {filter2}'}), 400
-
-    try:
-        if filter1 and filter2:
-            if filter1 == filter2:
-                category_courses = _fetch_all_category_ge_courses(filter1)
-                return jsonify({'courses': category_courses}), 200
-            intersection_courses = _get_all_ge_intersection(filter1, filter2)
-            return jsonify({'courses': intersection_courses}), 200
-        elif filter1 or filter2:
-            category_courses = _fetch_all_category_ge_courses(filter1 or filter2)
-            return jsonify({'courses': category_courses}), 200
-        else:
-            all_ge_courses = _fetch_all_category_ge_courses('ALL')
-            return jsonify({'courses': all_ge_courses}), 200
-    except RuntimeError as e:
-        return jsonify({'error': str(e)}), 503
-    except Exception:
-        return jsonify({'error': 'An unexpected error occurred'}), 500
-
-
-@ge_bp.route('/clear-cache', methods=['POST'])
-def clear_cache():
-    """Clear cache (development only)"""
-    from flask import current_app
-
-    if not current_app.debug:
-        return jsonify({'error': 'This endpoint is only available in development mode'}), 403
-
-    category = request.args.get('category', None)
-
-    if category:
-        _delete_associated_intersection_caches(category)
-        cache.delete_memoized(_fetch_all_category_ge_courses, category)
-        return jsonify({'message': f'Cache cleared for {category}'}), 200
-    else:
-        cache.clear()
-        return jsonify({'message': 'All caches cleared'}), 200

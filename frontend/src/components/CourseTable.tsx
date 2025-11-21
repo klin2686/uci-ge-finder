@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import type { Course } from '../types/course';
 import SortArrows from '../icons/SortArrows';
 
@@ -7,10 +8,53 @@ interface CourseTableProps {
   error: string | null;
 }
 
+type SortColumn = 'courseCode' | 'courseTitle' | 'units' | 'geCategories';
+type SortDirection = 'asc' | 'desc';
+
 const MIN_TABLE_WIDTH = 1000; // Minimum width before horizontal scroll kicks in
 const GRID_COLUMNS = '173px 276px 115px 189px 1fr';
 
 export default function CourseTable({ courses, isLoading, error }: CourseTableProps) {
+  const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      // Cycle: asc -> desc -> clear
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        setSortColumn(null);
+        setSortDirection('asc');
+      }
+    } else {
+      // New column, start with ascending
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedCourses = useMemo(() => {
+    if (!sortColumn) return courses;
+
+    return [...courses].sort((a, b) => {
+      const aVal = a[sortColumn];
+      const bVal = b[sortColumn];
+
+      let comparison = 0;
+      if (sortColumn === 'units') {
+        // Parse units as numbers for proper sorting
+        const aNum = parseFloat(aVal) || 0;
+        const bNum = parseFloat(bVal) || 0;
+        comparison = aNum - bNum;
+      } else {
+        comparison = aVal.localeCompare(bVal);
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [courses, sortColumn, sortDirection]);
+
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       {/* Scrollable table area (horizontal + vertical) */}
@@ -24,44 +68,66 @@ export default function CourseTable({ courses, isLoading, error }: CourseTablePr
               gridTemplateColumns: GRID_COLUMNS,
             }}
           >
-            <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+            <div
+              className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+              onClick={() => handleSort('courseCode')}
+            >
               <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
                 Course Code
               </p>
               <div className="flex-grow" />
-              <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+              <SortArrows
+                className="text-[#7d7d7d] dark:text-gray-300"
+                activeDirection={sortColumn === 'courseCode' ? sortDirection : null}
+              />
             </div>
 
-            <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+            <div
+              className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+              onClick={() => handleSort('courseTitle')}
+            >
               <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
                 Course Title
               </p>
               <div className="flex-grow" />
-              <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+              <SortArrows
+                className="text-[#7d7d7d] dark:text-gray-300"
+                activeDirection={sortColumn === 'courseTitle' ? sortDirection : null}
+              />
             </div>
 
-            <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+            <div
+              className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+              onClick={() => handleSort('units')}
+            >
               <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
                 Units
               </p>
               <div className="flex-grow" />
-              <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+              <SortArrows
+                className="text-[#7d7d7d] dark:text-gray-300"
+                activeDirection={sortColumn === 'units' ? sortDirection : null}
+              />
             </div>
 
-            <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+            <div
+              className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+              onClick={() => handleSort('geCategories')}
+            >
               <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
                 GE Categories
               </p>
               <div className="flex-grow" />
-              <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
+              <SortArrows
+                className="text-[#7d7d7d] dark:text-gray-300"
+                activeDirection={sortColumn === 'geCategories' ? sortDirection : null}
+              />
             </div>
 
             <div className="h-full flex items-center px-5 py-3.5">
               <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
                 Description
               </p>
-              <div className="flex-grow" />
-              <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
             </div>
           </div>
 
@@ -82,7 +148,7 @@ export default function CourseTable({ courses, isLoading, error }: CourseTablePr
                 </p>
               </div>
             ) : (
-              courses.map((course, index) => (
+              sortedCourses.map((course, index) => (
                 <div
                   key={`${course.courseCode}-${index}`}
                   className="border-b border-[#ebebeb] dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"

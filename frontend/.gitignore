@@ -71,3 +71,6 @@ Desktop.ini
 
 # Optional stylelint cache
 .stylelintcache
+
+# Vercel
+.vercel

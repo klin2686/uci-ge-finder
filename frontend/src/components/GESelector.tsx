@@ -46,7 +46,7 @@ export default function GESelector({ value, onChange, placeholder = 'Select GE C
         <span className={`text-sm font-medium ${value ? 'text-black dark:text-white' : 'text-[#717680]'}`}>
           {value ? GE_CATEGORY_LABELS[value] : placeholder}
         </span>
-        <ChevronDown className={`shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`shrink-0 transition-transform text-[#717680] ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (

@@ -4,11 +4,9 @@ import SortArrows from '../icons/SortArrows';
 interface CourseTableProps {
   courses: Course[];
   isLoading: boolean;
-  onLoadMore?: () => void;
-  hasMore: boolean;
 }
 
-export default function CourseTable({ courses, isLoading, onLoadMore, hasMore }: CourseTableProps) {
+export default function CourseTable({ courses, isLoading }: CourseTableProps) {
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       {/* Table Headers */}
@@ -51,7 +49,7 @@ export default function CourseTable({ courses, isLoading, onLoadMore, hasMore }:
           <SortArrows className="text-[#7d7d7d] dark:text-gray-300 cursor-pointer" />
         </div>
 
-        <div className="border-r border-[#ebebeb] dark:border-gray-600 h-full flex items-center px-5 py-3.5">
+        <div className="h-full flex items-center px-5 py-3.5">
           <p className="font-inter font-medium text-[16px] leading-6 text-[#7d7d7d] dark:text-gray-300">
             Description
           </p>
@@ -62,7 +60,7 @@ export default function CourseTable({ courses, isLoading, onLoadMore, hasMore }:
 
       {/* Course List */}
       <div className="flex-1 overflow-y-auto">
-        {isLoading && courses.length === 0 ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <p className="text-gray-500 dark:text-gray-400 text-lg">Loading courses...</p>
           </div>
@@ -73,61 +71,54 @@ export default function CourseTable({ courses, isLoading, onLoadMore, hasMore }:
             </p>
           </div>
         ) : (
-          <>
-            {courses.map((course, index) => (
-              <div
-                key={`${course.courseCode}-${index}`}
-                className="border-b border-[#ebebeb] dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '173px 276px 115px 189px 1fr',
-                }}
-              >
-                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
-                  <p className="font-inter font-medium text-[14px] leading-5 text-black dark:text-white">
-                    {course.courseCode}
-                  </p>
-                </div>
-
-                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
-                  <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
-                    {course.courseTitle}
-                  </p>
-                </div>
-
-                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
-                  <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
-                    {course.units}
-                  </p>
-                </div>
-
-                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
-                  <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
-                    {course.geCategories}
-                  </p>
-                </div>
-
-                <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
-                  <p className="font-inter text-[14px] leading-5 text-black dark:text-white line-clamp-3">
-                    {course.description}
-                  </p>
-                </div>
+          courses.map((course, index) => (
+            <div
+              key={`${course.courseCode}-${index}`}
+              className="border-b border-[#ebebeb] dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '173px 276px 115px 189px 1fr',
+              }}
+            >
+              <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                <p className="font-inter font-medium text-[14px] leading-5 text-black dark:text-white">
+                  {course.courseCode}
+                </p>
               </div>
-            ))}
 
-            {hasMore && (
-              <div className="flex items-center justify-center py-8">
-                <button
-                  onClick={onLoadMore}
-                  disabled={isLoading}
-                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
-                >
-                  {isLoading ? 'Loading...' : 'Load More'}
-                </button>
+              <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
+                  {course.courseTitle}
+                </p>
               </div>
-            )}
-          </>
+
+              <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
+                  {course.units}
+                </p>
+              </div>
+
+              <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
+                  {course.geCategories}
+                </p>
+              </div>
+
+              <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
+                <p className="font-inter text-[14px] leading-5 text-black dark:text-white line-clamp-3">
+                  {course.description}
+                </p>
+              </div>
+            </div>
+          ))
         )}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#ebebeb] dark:border-gray-600 h-[22px] shrink-0 flex items-center px-[25px]">
+        <p className="font-inter font-normal text-[12px] text-[#aaaaaa] dark:text-gray-400">
+          Showing {courses.length} {courses.length === 1 ? 'course' : 'courses'}
+        </p>
       </div>
     </div>
   );

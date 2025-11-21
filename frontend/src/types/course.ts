@@ -8,7 +8,6 @@ export interface Course {
 
 export interface CoursesResponse {
   courses: Course[];
-  nextCursor: string | null;
 }
 
 export type GECategory =

@@ -4,12 +4,13 @@ import SortArrows from '../icons/SortArrows';
 interface CourseTableProps {
   courses: Course[];
   isLoading: boolean;
+  error: string | null;
 }
 
 const MIN_TABLE_WIDTH = 1000; // Minimum width before horizontal scroll kicks in
 const GRID_COLUMNS = '173px 276px 115px 189px 1fr';
 
-export default function CourseTable({ courses, isLoading }: CourseTableProps) {
+export default function CourseTable({ courses, isLoading, error }: CourseTableProps) {
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       {/* Scrollable table area (horizontal + vertical) */}
@@ -70,10 +71,14 @@ export default function CourseTable({ courses, isLoading }: CourseTableProps) {
               <div className="flex items-center justify-center py-20">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">Loading courses...</p>
               </div>
+            ) : error ? (
+              <div className="flex items-center justify-center py-20">
+                <p className="text-red-500 dark:text-red-400 text-lg">{error}</p>
+              </div>
             ) : courses.length === 0 ? (
               <div className="flex items-center justify-center py-20">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">
-                  Select GE categories to find courses
+                  No courses found
                 </p>
               </div>
             ) : (

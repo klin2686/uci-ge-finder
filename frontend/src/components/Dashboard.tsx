@@ -13,17 +13,21 @@ export default function Dashboard() {
   const [filter2, setFilter2] = useState<GECategory | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch courses when filters change
   useEffect(() => {
     const loadCourses = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const data = await fetchCourses({ filter1, filter2 });
         setCourses(data.courses);
-      } catch (error) {
-        console.error('Error fetching courses:', error);
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+        setError('Failed to load courses. Please try again.');
+        setCourses([]);
       } finally {
         setIsLoading(false);
       }
@@ -95,6 +99,7 @@ export default function Dashboard() {
             <CourseTable
               courses={filteredCourses}
               isLoading={isLoading}
+              error={error}
             />
           </div>
         </div>

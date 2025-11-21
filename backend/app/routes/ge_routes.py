@@ -22,7 +22,7 @@ VALID_GE_CATEGORIES = {
 
 
 @ge_bp.route('/ge-courses', methods=['GET'])
-@limiter.limit('3/second;30/minute')
+@limiter.limit('2/second;60/minute')
 def get_ge_courses():
     """Get courses that satisfy one or multiple GE categories; if no filters, return all GE courses"""
 

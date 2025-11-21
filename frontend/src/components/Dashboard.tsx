@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Course, GECategory } from '../types/course';
-import { fetchCourses } from '../services/api';
+import { fetchCourses, ApiError } from '../services/api';
 import { useTheme } from '../contexts/ThemeContext';
 import GESelector from './GESelector';
 import CourseTable from './CourseTable';
@@ -26,7 +26,11 @@ export default function Dashboard() {
         setCourses(data.courses);
       } catch (err) {
         console.error('Error fetching courses:', err);
-        setError('Failed to load courses. Please try again.');
+        if (err instanceof ApiError && err.status === 429) {
+          setError('Too many requests. Please wait a moment.');
+        } else {
+          setError('Failed to load courses. Please try again.');
+        }
         setCourses([]);
       } finally {
         setIsLoading(false);

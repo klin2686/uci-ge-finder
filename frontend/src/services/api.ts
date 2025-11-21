@@ -2,6 +2,15 @@ import type { CoursesResponse, GECategory } from '../types/course';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 interface FetchCoursesParams {
   filter1?: GECategory | null;
   filter2?: GECategory | null;
@@ -19,7 +28,7 @@ export async function fetchCourses({
   const response = await fetch(`${API_BASE_URL}/api/ge-courses?${params.toString()}`);
 
   if (!response.ok) {
-    throw new Error('Failed to fetch courses');
+    throw new ApiError('Failed to fetch courses', response.status);
   }
 
   return response.json();

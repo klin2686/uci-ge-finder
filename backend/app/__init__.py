@@ -1,7 +1,5 @@
 import os
-import ssl
 
-import redis
 from flask import Flask
 
 from app.config import config
@@ -21,15 +19,7 @@ def create_app(config_name=None):
     limiter.init_app(app)
 
     from app import extensions
-    redis_url = app.config['CACHE_REDIS_URL']
-    ssl_options = {}
-    if redis_url and redis_url.startswith('rediss://'):
-        ssl_options = {"ssl_cert_reqs": ssl.CERT_NONE}
-    extensions.redis_client = redis.from_url(
-        redis_url,
-        decode_responses=True,
-        **ssl_options
-    )
+    extensions.redis_client = app.config['CACHE_REDIS']
 
     from app.routes import register_blueprints
     register_blueprints(app)

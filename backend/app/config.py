@@ -1,10 +1,12 @@
 import os
 from pathlib import Path
+from typing import Any
 
+import redis
 from dotenv import load_dotenv
 
 basedir = Path(__file__).parent.parent
-load_dotenv(basedir / '.env')
+load_dotenv(basedir / '.env', override=True)
 
 
 class Config:
@@ -13,20 +15,19 @@ class Config:
 
     REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 
-    _is_rediss = REDIS_URL.startswith('rediss')
-
     CACHE_TYPE = os.environ.get('CACHE_TYPE', 'RedisCache')
     CACHE_DEFAULT_TIMEOUT = int(os.environ.get('CACHE_DEFAULT_TIMEOUT', 300))
-    CACHE_REDIS_URL = f'{REDIS_URL}/0' if CACHE_TYPE == 'RedisCache' else None
+    if CACHE_TYPE == 'RedisCache':
+        cache_redis_url = f'{REDIS_URL}/0'
+        ssl_options = {}
+        if cache_redis_url and cache_redis_url.startswith('rediss://'):
+            ssl_options = {'ssl_cert_reqs': None}
+        CACHE_REDIS = redis.from_url(cache_redis_url, **ssl_options)
 
     RATELIMIT_STORAGE_URI = f'{REDIS_URL}/1'
-    RATELIMIT_STORAGE_OPTIONS = {'socket_connect_timeout': 5}
-
-    if _is_rediss:
-        # Heroku Redis uses self-signed certs, disable verification
+    RATELIMIT_STORAGE_OPTIONS: dict[str, Any] = {'socket_connect_timeout': 5}
+    if RATELIMIT_STORAGE_URI.startswith('rediss://'):
         RATELIMIT_STORAGE_OPTIONS['ssl_cert_reqs'] = None
-        CACHE_OPTIONS = {'ssl_cert_reqs': None}
-
     RATELIMIT_STRATEGY = os.environ.get('RATELIMIT_STRATEGY', "fixed-window")
 
 

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     REDIS_URL: str
     CACHE_TTL_SECONDS: int
     CORS_ORIGINS: list[str]
+    ENVIRONMENT: str
 
 
 settings = Settings()  # type: ignore[call-arg]

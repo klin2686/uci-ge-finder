@@ -1,3 +1,5 @@
+from aiocache import Cache, RedisCache
+from aiocache.serializers import PickleSerializer
 from httpx import AsyncClient, HTTPStatusError, RequestError, TimeoutException
 
 from .config import settings
@@ -32,23 +34,48 @@ class CoursesService:
 
     def __init__(self):
         self._client: AsyncClient | None = None
+        self._cache: RedisCache | None = None
 
-    def start(self):
+    async def start(self):
         self._client = AsyncClient(
             headers={'Accept-Encoding': '', 'Authorization': f'Bearer {settings.ANTEATER_API_KEY}'},
         )
+        cache = Cache.from_url(settings.REDIS_URL)
+        if type(cache) is not RedisCache:
+            raise RuntimeError(f'Invalid value for REDIS_URL: {settings.REDIS_URL}')
+        cache.serializer = PickleSerializer()
+
+        try:
+            test_key = '__cache_health_check__'
+            await cache.set(test_key, 'ok', ttl=5)
+            result = await cache.get(test_key)
+            if result != 'ok':
+                raise RuntimeError('Cache read/write test failed.')
+            await cache.delete(test_key)
+        except Exception as e:
+            await cache.close()
+            raise RuntimeError(f'Failed to connect to Redis at {settings.REDIS_URL}: {e}') from e
+
+        self._cache = cache
 
     async def close(self):
         if self._client is not None:
             await self._client.aclose()
+        if self._cache is not None:
+            await self._cache.close()
 
     async def fetch_category_ge_courses(self, ge_category):
+        if self._cache is None:
+            raise RuntimeError('CoursesService has not been started. Call start() before using the service.')
+        cache_key = f'courses:category:{ge_category}'
+        cached_result = await self._cache.get(cache_key)
+        if cached_result is not None:
+            return cached_result
+
         if self._client is None:
             raise RuntimeError('CoursesService has not been started. Call start() before using the service.')
-
         category_ge_courses = []
         cursor = None
-
         while True:
             params = {'geCategory': ge_category, 'cursor': cursor}
             try:
@@ -71,6 +98,8 @@ class CoursesService:
                 raise RuntimeError(f'Invalid response format from AnteaterAPI: {e}')
             if cursor is None:
                 break
+
+        await self._cache.set(cache_key, category_ge_courses, ttl=settings.CACHE_TTL_SECONDS)
 
         return category_ge_courses
 

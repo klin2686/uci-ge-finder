@@ -8,7 +8,7 @@ from .routes import router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    courses_service.start()
+    await courses_service.start()
     yield
     await courses_service.close()
 

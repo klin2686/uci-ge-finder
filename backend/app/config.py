@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=_dotenv_path, env_ignore_empty=True, extra='ignore')
 
     ANTEATER_API_KEY: str
+    REDIS_URL: str
+    CACHE_TTL_SECONDS: int
 
 
 settings = Settings()  # type: ignore[call-arg]

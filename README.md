@@ -20,21 +20,8 @@ A web application that helps UC Irvine students find general education (GE) cour
 
 ### Backend
 
-- Python with Flask
+- Python with FastAPI
 - Redis for caching and rate limiting
-- Flask-Caching for performance optimization
-- Flask-Limiter for rate limiting
-
-## Getting Started
-
-See the setup instructions for each component:
-
-- [frontend/README.md](frontend/README.md)
-- [backend/README.md](backend/README.md)
-
-## License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) for more details.
 
 ## Data Attribution
 

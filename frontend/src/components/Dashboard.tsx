@@ -9,8 +9,8 @@ import { MoonIcon, SunIcon } from '../icons/DarkModeToggle';
 
 export default function Dashboard() {
   const { theme, toggleTheme } = useTheme();
-  const [filter1, setFilter1] = useState<GECategory | null>(null);
-  const [filter2, setFilter2] = useState<GECategory | null>(null);
+  const [category1, setCategory1] = useState<GECategory | null>(null);
+  const [category2, setCategory2] = useState<GECategory | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export default function Dashboard() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await fetchCourses({ filter1, filter2 });
+        const data = await fetchCourses({ category1, category2 });
         setCourses(data.courses);
       } catch (err) {
         console.error('Error fetching courses:', err);
@@ -38,7 +38,7 @@ export default function Dashboard() {
     };
 
     loadCourses();
-  }, [filter1, filter2]);
+  }, [category1, category2]);
 
   // Filter courses by search query
   const filteredCourses = courses.filter((course) => {
@@ -86,13 +86,13 @@ export default function Dashboard() {
             />
             <div className="flex gap-4 shrink min-w-0">
               <GESelector
-                value={filter1}
-                onChange={setFilter1}
+                value={category1}
+                onChange={setCategory1}
                 placeholder="Select GE Category"
               />
               <GESelector
-                value={filter2}
-                onChange={setFilter2}
+                value={category2}
+                onChange={setCategory2}
                 placeholder="Select GE Category"
               />
             </div>

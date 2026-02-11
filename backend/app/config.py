@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     ANTEATER_API_KEY: str
     REDIS_URL: str
     CACHE_TTL_SECONDS: int
+    CORS_ORIGINS: list[str]
 
 
 settings = Settings()  # type: ignore[call-arg]

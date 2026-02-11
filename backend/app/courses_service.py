@@ -1,4 +1,6 @@
-from aiocache import Cache, RedisCache
+from urllib.parse import urlparse
+
+from aiocache import RedisCache
 from aiocache.serializers import PickleSerializer
 from httpx import AsyncClient, HTTPStatusError, RequestError, TimeoutException
 
@@ -40,10 +42,24 @@ class CoursesService:
         self._client = AsyncClient(
             headers={'Accept-Encoding': '', 'Authorization': f'Bearer {settings.ANTEATER_API_KEY}'},
         )
-        cache = Cache.from_url(settings.REDIS_URL)
-        if type(cache) is not RedisCache:
-            raise RuntimeError(f'Invalid value for REDIS_URL: {settings.REDIS_URL}')
-        cache.serializer = PickleSerializer()
+
+        parsed = urlparse(settings.REDIS_URL)
+        use_ssl = parsed.scheme == 'rediss'
+
+        cache_config = {
+            'endpoint': parsed.hostname or 'localhost',
+            'port': parsed.port or 6379,
+            'serializer': PickleSerializer(),
+        }
+
+        if parsed.password:
+            cache_config['password'] = parsed.password
+
+        if use_ssl:
+            cache_config['ssl'] = True
+            cache_config['connection_pool_kwargs'] = {'ssl_cert_reqs': None}
+
+        cache = RedisCache(**cache_config)
 
         try:
             test_key = '__cache_health_check__'

@@ -34,6 +34,15 @@ class CoursesService:
         'GE-8',
     }
 
+    INCLUDED_YEARS = {
+        '2021',
+        '2022',
+        '2023',
+        '2024',
+        '2025',
+        '2026',
+    }
+
     def __init__(self):
         self._client: AsyncClient | None = None
         self._cache: RedisCache | None = None
@@ -159,9 +168,8 @@ class CoursesService:
     @staticmethod
     def _is_current_course(course):
         terms = course.get('terms', [])
-        current_years = {'2024', '2025', '2026'}
         for term in terms:
-            if term.strip()[:4] in current_years:
+            if term.strip()[:4] in CoursesService.INCLUDED_YEARS:
                 return True
         return False
 

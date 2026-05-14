@@ -1,3 +1,5 @@
+import asyncio
+from collections import defaultdict
 from urllib.parse import urlparse
 
 from aiocache import RedisCache
@@ -41,11 +43,13 @@ class CoursesService:
         '2024',
         '2025',
         '2026',
+        '2027',
     }
 
     def __init__(self):
         self._client: AsyncClient | None = None
         self._cache: RedisCache | None = None
+        self._fetch_locks: defaultdict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
 
     async def start(self):
         self._client = AsyncClient(
@@ -90,41 +94,44 @@ class CoursesService:
             await self._cache.close()
 
     async def fetch_category_ge_courses(self, ge_category):
-        if self._cache is None:
+        if self._cache is None or self._client is None:
             raise RuntimeError('CoursesService has not been started. Call start() before using the service.')
         cache_key = f'courses:category:{ge_category}'
         cached_result = await self._cache.get(cache_key)
         if cached_result is not None:
             return cached_result
 
-        if self._client is None:
-            raise RuntimeError('CoursesService has not been started. Call start() before using the service.')
-        category_ge_courses = []
-        cursor = None
-        while True:
-            params = {'geCategory': ge_category, 'cursor': cursor}
-            try:
-                response = await self._client.get(
-                    'https://anteaterapi.com/v2/rest/coursesCursor',
-                    params=params,
-                    timeout=5,
-                )
-                response.raise_for_status()
-                data = response.json()['data']
-                category_ge_courses.extend(
-                    self._extract_course_fields(c) for c in data['items'] if self._is_current_course(c)
-                )
-                cursor = data['nextCursor']
-            except TimeoutException as e:
-                raise RuntimeError(f'Request to AnteaterAPI timed out while fetching {ge_category} courses') from e
-            except (RequestError, HTTPStatusError) as e:
-                raise RuntimeError(f'Failed to fetch courses from AnteaterAPI: {e}') from e
-            except (KeyError, IndexError, ValueError) as e:
-                raise RuntimeError(f'Invalid response format from AnteaterAPI: {e}')
-            if cursor is None:
-                break
+        async with self._fetch_locks[ge_category]:
+            cached_result = await self._cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
 
-        await self._cache.set(cache_key, category_ge_courses, ttl=settings.CACHE_TTL_SECONDS)
+            category_ge_courses = []
+            cursor = None
+            while True:
+                params = {'geCategory': ge_category, 'cursor': cursor}
+                try:
+                    response = await self._client.get(
+                        'https://anteaterapi.com/v2/rest/coursesCursor',
+                        params=params,
+                        timeout=5,
+                    )
+                    response.raise_for_status()
+                    data = response.json()['data']
+                    category_ge_courses.extend(
+                        self._extract_course_fields(c) for c in data['items'] if self._is_current_course(c)
+                    )
+                    cursor = data['nextCursor']
+                except TimeoutException as e:
+                    raise RuntimeError(f'Request to AnteaterAPI timed out while fetching {ge_category} courses') from e
+                except (RequestError, HTTPStatusError) as e:
+                    raise RuntimeError(f'Failed to fetch courses from AnteaterAPI: {e}') from e
+                except (KeyError, IndexError, ValueError) as e:
+                    raise RuntimeError(f'Invalid response format from AnteaterAPI: {e}')
+                if cursor is None:
+                    break
+
+            await self._cache.set(cache_key, category_ge_courses, ttl=settings.CACHE_TTL_SECONDS)
 
         return category_ge_courses
 
@@ -163,6 +170,8 @@ class CoursesService:
                 if category.strip() in CoursesService.GE_FULL_NAME_TO_ROMAN
             },
             'description': course['description'],
+            'prerequisites': course['prerequisiteText'],
+            'restrictions': course['restriction'],
         }
 
     @staticmethod

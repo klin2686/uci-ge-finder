@@ -30,6 +30,8 @@ class Course(ToCamelBaseModel):
     units: int | float
     ge_categories: set[str]
     description: str
+    prerequisites: str
+    restrictions: str
 
     @field_serializer('ge_categories', mode='plain')
     def convert_ge_categories_to_string(self, ge_categories: set[str]) -> str:

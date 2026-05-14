@@ -132,27 +132,25 @@ class CoursesService:
         return category_ge_courses
 
     async def fetch_all_ge_courses(self):
-        sorted_ge_categories = sorted(self.PARAMETER_GE_CATEGORIES)
-        seen_codes = set()
+        results = await asyncio.gather(
+            *(self.fetch_category_ge_courses(cat) for cat in sorted(self.PARAMETER_GE_CATEGORIES))
+        )
+        seen_codes: set[str] = set()
         all_courses = []
-
-        for category in sorted_ge_categories:
-            category_courses = await self.fetch_category_ge_courses(category)
+        for category_courses in results:
             for course in category_courses:
                 if course['course_code'] not in seen_codes:
                     seen_codes.add(course['course_code'])
                     all_courses.append(course)
-
         return all_courses
 
     async def fetch_intersection_courses(self, category1, category2):
-        category1_courses = await self.fetch_category_ge_courses(category1)
+        category1_courses, category2_courses = await asyncio.gather(
+            self.fetch_category_ge_courses(category1),
+            self.fetch_category_ge_courses(category2),
+        )
         category1_codes = {c['course_code'] for c in category1_courses}
-
-        category2_courses = await self.fetch_category_ge_courses(category2)
-        intersection_courses = [c for c in category2_courses if c['course_code'] in category1_codes]
-
-        return intersection_courses
+        return [c for c in category2_courses if c['course_code'] in category1_codes]
 
     @staticmethod
     def _extract_course_fields(course):

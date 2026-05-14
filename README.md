@@ -21,7 +21,13 @@ A web application that helps UC Irvine students find general education (GE) cour
 ### Backend
 
 - Python with FastAPI
-- Redis for caching and rate limiting
+- Redis for caching
+
+### Deployment
+
+- Cloudflare for rate limiting
+- Vercel for frontend
+- Heroku for backend
 
 ## Data Attribution
 

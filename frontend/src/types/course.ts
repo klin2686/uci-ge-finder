@@ -4,6 +4,8 @@ export interface Course {
   units: string;
   geCategories: string;
   description: string;
+  prerequisites: string;
+  restrictions: string;
 }
 
 export interface CoursesResponse {

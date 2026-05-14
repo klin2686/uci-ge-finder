@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useLayoutEffect, useRef } from 'react';
 import type { Course } from '../types/course';
 import SortArrows from '../icons/SortArrows';
 
@@ -17,6 +17,32 @@ const GRID_COLUMNS = '173px 276px 115px 189px 1fr';
 export default function CourseTable({ courses, isLoading, error }: CourseTableProps) {
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [popover, setPopover] = useState<{ course: Course; anchorTop: number; anchorBottom: number; left: number } | null>(null);
+  const [computedTop, setComputedTop] = useState<number | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!popover) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPopover(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [popover]);
+
+  useLayoutEffect(() => {
+    if (!popover || !popoverRef.current) {
+      setComputedTop(null);
+      return;
+    }
+    const height = popoverRef.current.offsetHeight;
+    const MARGIN = 8;
+    let top = popover.anchorTop;
+    if (top + height > window.innerHeight - MARGIN) {
+      top = Math.max(MARGIN, popover.anchorBottom - height);
+    }
+    setComputedTop(top);
+  }, [popover]);
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -158,9 +184,15 @@ export default function CourseTable({ courses, isLoading, error }: CourseTablePr
                   }}
                 >
                   <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
-                    <p className="font-inter font-medium text-[14px] leading-5 text-black dark:text-white">
+                    <button
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setPopover({ course, anchorTop: rect.top, anchorBottom: rect.bottom, left: rect.right + 8 });
+                      }}
+                      className="font-inter font-medium text-[14px] leading-5 text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer text-left"
+                    >
                       {course.courseCode}
-                    </p>
+                    </button>
                   </div>
 
                   <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
@@ -192,6 +224,53 @@ export default function CourseTable({ courses, isLoading, error }: CourseTablePr
           </div>
         </div>
       </div>
+
+      {/* Course detail popover */}
+      {popover && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setPopover(null)} />
+          <div
+            ref={popoverRef}
+            className="fixed z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-[#ebebeb] dark:border-gray-600 w-[345px] p-4"
+            style={{
+              top: computedTop ?? popover.anchorTop,
+              left: popover.left,
+              visibility: computedTop !== null ? 'visible' : 'hidden',
+            }}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <h2 className="font-inter font-semibold text-[16px] text-black dark:text-white">
+                {popover.course.courseCode}
+              </h2>
+              <button
+                onClick={() => setPopover(null)}
+                className="ml-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mb-3">
+              <p className="font-inter font-medium text-[13px] text-[#7d7d7d] dark:text-gray-400 mb-1">
+                Prerequisites
+              </p>
+              <p className="font-inter text-[13px] leading-5 text-black dark:text-white">
+                {popover.course.prerequisites || 'None'}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-inter font-medium text-[13px] text-[#7d7d7d] dark:text-gray-400 mb-1">
+                Requirements
+              </p>
+              <p className="font-inter text-[13px] leading-5 text-black dark:text-white">
+                {popover.course.restrictions || 'None'}
+              </p>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Footer */}
       <div className="border-t border-[#ebebeb] dark:border-gray-600 h-[22px] shrink-0 flex items-center justify-between px-[25px]">

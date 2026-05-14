@@ -1,5 +1,6 @@
 import asyncio
 from collections import defaultdict
+from enum import Enum
 from urllib.parse import urlparse
 
 from aiocache import RedisCache
@@ -7,6 +8,19 @@ from aiocache.serializers import PickleSerializer
 from httpx import AsyncClient, HTTPStatusError, RequestError, TimeoutException
 
 from .config import settings
+
+
+class ParameterGECategories(str, Enum):
+    GE_1A = 'GE-1A'
+    GE_1B = 'GE-1B'
+    GE_2 = 'GE-2'
+    GE_3 = 'GE-3'
+    GE_4 = 'GE-4'
+    GE_5A = 'GE-5A'
+    GE_5B = 'GE-5B'
+    GE_6 = 'GE-6'
+    GE_7 = 'GE-7'
+    GE_8 = 'GE-8'
 
 
 class CoursesService:
@@ -21,19 +35,6 @@ class CoursesService:
         'GE VI: Language Other Than English': 'VI',
         'GE VII: Multicultural Studies': 'VII',
         'GE VIII: International/Global Issues': 'VIII',
-    }
-
-    PARAMETER_GE_CATEGORIES = {
-        'GE-1A',
-        'GE-1B',
-        'GE-2',
-        'GE-3',
-        'GE-4',
-        'GE-5A',
-        'GE-5B',
-        'GE-6',
-        'GE-7',
-        'GE-8',
     }
 
     INCLUDED_YEARS = {
@@ -90,7 +91,8 @@ class CoursesService:
         if self._cache is not None:
             await self._cache.close()
 
-    async def fetch_category_ge_courses(self, ge_category):
+    async def fetch_category_ge_courses(self, ge_category_member: ParameterGECategories):
+        ge_category = ge_category_member.value
         if self._cache is None or self._client is None:
             raise RuntimeError('CoursesService has not been started. Call start() before using the service.')
         cache_key = f'courses:category:{ge_category}'
@@ -133,9 +135,7 @@ class CoursesService:
         return category_ge_courses
 
     async def fetch_all_ge_courses(self):
-        results = await asyncio.gather(
-            *(self.fetch_category_ge_courses(cat) for cat in sorted(self.PARAMETER_GE_CATEGORIES))
-        )
+        results = await asyncio.gather(*(self.fetch_category_ge_courses(cat) for cat in ParameterGECategories))
         seen_codes: set[str] = set()
         all_courses = []
         for category_courses in results:
@@ -145,7 +145,7 @@ class CoursesService:
                     all_courses.append(course)
         return all_courses
 
-    async def fetch_intersection_courses(self, category1, category2):
+    async def fetch_intersection_courses(self, category1: ParameterGECategories, category2: ParameterGECategories):
         category1_courses, category2_courses = await asyncio.gather(
             self.fetch_category_ge_courses(category1),
             self.fetch_category_ge_courses(category2),

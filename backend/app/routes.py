@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from .courses_service import courses_service
+from .courses_service import ParameterGECategories, courses_service
 from .schemas import CourseList
 
 router = APIRouter(prefix='/api')
@@ -12,21 +12,19 @@ async def check_health():
 
 
 @router.get('/ge-courses', response_model=CourseList)
-async def get_ge_courses(category1: str | None = None, category2: str | None = None):
-    if category1 and category1 not in courses_service.PARAMETER_GE_CATEGORIES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Invalid category1 value: {category1}')
-    if category2 and category2 not in courses_service.PARAMETER_GE_CATEGORIES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Invalid category2 value: {category2}')
-
+async def get_ge_courses(
+    category1: ParameterGECategories | None = None, category2: ParameterGECategories | None = None
+):
     try:
         if category1 and category2:
             if category1 == category2:
                 category_courses = await courses_service.fetch_category_ge_courses(category1)
                 return {'courses': category_courses}
-            intersection_courses = await courses_service.fetch_intersection_courses(category1, category2)
-            return {'courses': intersection_courses}
+            else:
+                intersection_courses = await courses_service.fetch_intersection_courses(category1, category2)
+                return {'courses': intersection_courses}
         elif category1 or category2:
-            category_courses = await courses_service.fetch_category_ge_courses(category1 or category2)
+            category_courses = await courses_service.fetch_category_ge_courses(category1 or category2)  # type: ignore
             return {'courses': category_courses}
         else:
             all_ge_courses = await courses_service.fetch_all_ge_courses()

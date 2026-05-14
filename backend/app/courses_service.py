@@ -1,16 +1,16 @@
 import asyncio
 from collections import defaultdict
-from enum import Enum
+from enum import StrEnum
 from urllib.parse import urlparse
 
 from aiocache import RedisCache
-from aiocache.serializers import PickleSerializer
+from aiocache.serializers import JsonSerializer
 from httpx import AsyncClient, HTTPStatusError, RequestError, TimeoutException
 
 from .config import settings
 
 
-class ParameterGECategories(str, Enum):
+class ParameterGECategories(StrEnum):
     GE_1A = 'GE-1A'
     GE_1B = 'GE-1B'
     GE_2 = 'GE-2'
@@ -37,6 +37,8 @@ class CoursesService:
         'GE VIII: International/Global Issues': 'VIII',
     }
 
+    GE_SORT_ORDER: dict[str, int] = {v: i for i, v in enumerate(GE_FULL_NAME_TO_ROMAN.values())}
+
     INCLUDED_YEARS = {
         '2025',
         '2026',
@@ -59,7 +61,7 @@ class CoursesService:
         cache_config = {
             'endpoint': parsed.hostname or 'localhost',
             'port': parsed.port or 6379,
-            'serializer': PickleSerializer(),
+            'serializer': JsonSerializer(),
             'pool_max_size': 10,
         }
 
@@ -91,8 +93,7 @@ class CoursesService:
         if self._cache is not None:
             await self._cache.close()
 
-    async def fetch_category_ge_courses(self, ge_category_member: ParameterGECategories):
-        ge_category = ge_category_member.value
+    async def fetch_category_ge_courses(self, ge_category: ParameterGECategories):
         if self._cache is None or self._client is None:
             raise RuntimeError('CoursesService has not been started. Call start() before using the service.')
         cache_key = f'courses:category:{ge_category}'
@@ -108,7 +109,7 @@ class CoursesService:
             category_ge_courses = []
             cursor = None
             while True:
-                params = {'geCategory': ge_category, 'cursor': cursor}
+                params = {'geCategory': ge_category.value, 'cursor': cursor}
                 try:
                     response = await self._client.get(
                         'https://anteaterapi.com/v2/rest/coursesCursor',
@@ -155,15 +156,20 @@ class CoursesService:
 
     @staticmethod
     def _extract_course_fields(course):
+        def create_sorted_ge_list(ge_list: list[str]):
+            result = [
+                CoursesService.GE_FULL_NAME_TO_ROMAN[cat]
+                for category in ge_list
+                if (cat := category.strip()) in CoursesService.GE_FULL_NAME_TO_ROMAN
+            ]
+            result.sort(key=lambda c: CoursesService.GE_SORT_ORDER[c])
+            return result
+
         return {
             'course_code': f'{course["department"]} {course["courseNumber"]}',
             'course_title': course['title'],
             'units': course['maxUnits'],
-            'ge_categories': {
-                CoursesService.GE_FULL_NAME_TO_ROMAN[category.strip()]
-                for category in course['geList']
-                if category.strip() in CoursesService.GE_FULL_NAME_TO_ROMAN
-            },
+            'ge_categories': create_sorted_ge_list(course['geList']),
             'description': course['description'],
             'prerequisites': course['prerequisiteText'],
             'restrictions': course['restriction'],
@@ -171,11 +177,7 @@ class CoursesService:
 
     @staticmethod
     def _is_current_course(course):
-        terms = course.get('terms', [])
-        for term in terms:
-            if term.strip()[:4] in CoursesService.INCLUDED_YEARS:
-                return True
-        return False
+        return any(term.strip()[:4] in CoursesService.INCLUDED_YEARS for term in course.get('terms', []))
 
 
 courses_service = CoursesService()

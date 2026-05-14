@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Course, GECategory } from '../types/course';
 import { fetchCourses, ApiError } from '../services/api';
 import { useTheme } from '../contexts/ThemeContext';
@@ -14,31 +14,44 @@ export default function Dashboard() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCountdown, setRetryCountdown] = useState<number | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch courses when filters change
-  useEffect(() => {
-    const loadCourses = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const data = await fetchCourses({ category1, category2 });
-        setCourses(data.courses);
-      } catch (err) {
-        console.error('Error fetching courses:', err);
-        if (err instanceof ApiError && err.status === 429) {
-          setError('Too many requests. Please wait a moment.');
-        } else {
-          setError('Failed to load courses. Please try again.');
-        }
-        setCourses([]);
-      } finally {
-        setIsLoading(false);
+  const loadCourses = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    setRetryCountdown(null);
+    try {
+      const data = await fetchCourses({ category1, category2 });
+      setCourses(data.courses);
+    } catch (err) {
+      console.error('Error fetching courses:', err);
+      if (err instanceof ApiError && err.status === 429) {
+        setRetryCountdown(5);
+      } else {
+        setError('Failed to load courses. Please try again.');
       }
-    };
-
-    loadCourses();
+      setCourses([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, [category1, category2]);
+
+  useEffect(() => {
+    loadCourses();
+  }, [loadCourses, fetchKey]);
+
+  // Countdown: tick down every second, retry when it reaches 0
+  useEffect(() => {
+    if (retryCountdown === null) return;
+    if (retryCountdown === 0) {
+      setFetchKey((k) => k + 1);
+      return;
+    }
+    const timer = setTimeout(() => setRetryCountdown((c) => c! - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [retryCountdown]);
 
   // Filter courses by search query
   const filteredCourses = courses.filter((course) => {
@@ -103,7 +116,7 @@ export default function Dashboard() {
             <CourseTable
               courses={filteredCourses}
               isLoading={isLoading}
-              error={error}
+              error={retryCountdown !== null ? `Too many requests. Retrying in ${retryCountdown}s...` : error}
             />
           </div>
         </div>

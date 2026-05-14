@@ -2,7 +2,7 @@ export interface Course {
   courseCode: string;
   courseTitle: string;
   units: string;
-  geCategories: string;
+  geCategories: string[];
   description: string;
   prerequisites: string;
   restrictions: string;

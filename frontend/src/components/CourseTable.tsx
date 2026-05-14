@@ -64,19 +64,14 @@ export default function CourseTable({ courses, isLoading, error }: CourseTablePr
     if (!sortColumn) return courses;
 
     return [...courses].sort((a, b) => {
-      const aVal = a[sortColumn];
-      const bVal = b[sortColumn];
-
       let comparison = 0;
       if (sortColumn === 'units') {
-        // Parse units as numbers for proper sorting
-        const aNum = parseFloat(aVal) || 0;
-        const bNum = parseFloat(bVal) || 0;
-        comparison = aNum - bNum;
+        comparison = (parseFloat(a.units) || 0) - (parseFloat(b.units) || 0);
+      } else if (sortColumn === 'geCategories') {
+        comparison = a.geCategories.join(', ').localeCompare(b.geCategories.join(', '));
       } else {
-        comparison = aVal.localeCompare(bVal);
+        comparison = a[sortColumn].localeCompare(b[sortColumn]);
       }
-
       return sortDirection === 'asc' ? comparison : -comparison;
     });
   }, [courses, sortColumn, sortDirection]);
@@ -209,7 +204,7 @@ export default function CourseTable({ courses, isLoading, error }: CourseTablePr
 
                   <div className="border-r border-[#ebebeb] dark:border-gray-600 px-5 py-4 flex items-center">
                     <p className="font-inter text-[14px] leading-5 text-black dark:text-white">
-                      {course.geCategories}
+                      {course.geCategories.join(', ')}
                     </p>
                   </div>
 

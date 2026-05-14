@@ -59,6 +59,7 @@ class CoursesService:
             'endpoint': parsed.hostname or 'localhost',
             'port': parsed.port or 6379,
             'serializer': PickleSerializer(),
+            'pool_max_size': 10,
         }
 
         if parsed.password:

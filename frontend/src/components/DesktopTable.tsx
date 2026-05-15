@@ -81,7 +81,7 @@ export function DesktopTable({
         borderRadius: 14,
       }}
     >
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-none">
         <table
           className="w-full text-[13.5px]"
           style={{

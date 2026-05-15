@@ -243,7 +243,7 @@ export function BrowseView({
 
       {/* results */}
       <div
-        className="flex-1 overflow-y-auto"
+        className={`flex-1 min-h-0 ${isMobile ? "overflow-y-auto" : "flex flex-col overflow-hidden"}`}
         style={{ padding: isMobile ? "6px 16px 24px" : "16px 24px 24px" }}
       >
         {sorted.length === 0 ? (
@@ -268,19 +268,36 @@ export function BrowseView({
             onToggleCompare={onToggleCompare}
           />
         ) : (
-          <div className="flex flex-col gap-2.5">
-            {sorted.map((c) => (
-              <CourseCard
-                key={c.courseCode}
-                course={c}
-                expanded={expanded.has(c.courseCode)}
-                onToggle={() => onToggleExpand(c.courseCode)}
-                inCompare={compare.includes(c.courseCode)}
-                onCompare={() => onToggleCompare(c.courseCode)}
-                selectedCats={cats}
-              />
-            ))}
-          </div>
+          <>
+            <div className="flex flex-col gap-2.5">
+              {sorted.map((c) => (
+                <CourseCard
+                  key={c.courseCode}
+                  course={c}
+                  expanded={expanded.has(c.courseCode)}
+                  onToggle={() => onToggleExpand(c.courseCode)}
+                  inCompare={compare.includes(c.courseCode)}
+                  onCompare={() => onToggleCompare(c.courseCode)}
+                  selectedCats={cats}
+                />
+              ))}
+            </div>
+            <p
+              className="text-center pt-4 pb-1"
+              style={{ fontSize: 11.5, color: "var(--color-text-muted)" }}
+            >
+              Data from{" "}
+              <a
+                href="https://icssc.link/about-anteaterapi"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2"
+                style={{ color: "var(--color-accent)" }}
+              >
+                Anteater API
+              </a>
+            </p>
+          </>
         )}
       </div>
 

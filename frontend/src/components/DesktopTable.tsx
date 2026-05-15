@@ -15,7 +15,7 @@ function Th({ col, label, style, sortBy, sortDir, onSort }: ThProps) {
   const active = sortBy === col;
   return (
     <th
-      className="text-left text-xs font-medium tracking-[0.04em] uppercase px-4 py-3.5 border-b cursor-pointer select-none whitespace-nowrap sticky top-0 transition-colors"
+      className="text-left text-xs font-medium tracking-[0.04em] uppercase px-4 py-3.5 border-b cursor-pointer select-none whitespace-nowrap sticky top-0 z-[1] transition-colors"
       style={{
         color: active ? "var(--color-text)" : "var(--color-text-muted)",
         background: "var(--color-surface)",
@@ -73,82 +73,119 @@ export function DesktopTable({
   onToggleCompare,
 }: Props) {
   return (
-    <table
-      className="w-full text-[13.5px]"
+    <div
+      className="flex-1 min-h-0 flex flex-col"
       style={{
-        borderCollapse: "separate",
-        borderSpacing: 0,
-        background: "var(--color-surface)",
+        overflow: "hidden",
         border: "1px solid var(--color-border)",
         borderRadius: 14,
-        overflow: "hidden",
       }}
     >
-      <thead>
-        <tr>
-          <Th
-            col="code"
-            label="Course"
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSort={onSort}
-          />
-          <Th
-            col="title"
-            label="Title"
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSort={onSort}
-          />
-          <Th
-            col="units"
-            label="Units"
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSort={onSort}
-          />
-          <Th
-            col="matches"
-            label="GE Categories"
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSort={onSort}
-          />
-          <th
-            className="text-left text-xs font-medium tracking-[0.04em] uppercase px-4 py-3.5 border-b sticky top-0"
-            style={{
-              color: "var(--color-text-muted)",
-              background: "var(--color-surface)",
-              borderColor: "var(--color-border)",
-              cursor: "default",
-            }}
-          >
-            Description
-          </th>
-          <th
-            className="border-b sticky top-0"
-            style={{
-              width: 80,
-              background: "var(--color-surface)",
-              borderColor: "var(--color-border)",
-              cursor: "default",
-            }}
-          />
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((c) => (
-          <CourseRow
-            key={c.courseCode}
-            course={c}
-            expanded={expanded.has(c.courseCode)}
-            onToggle={() => onToggleExpand(c.courseCode)}
-            inCompare={compare.includes(c.courseCode)}
-            onCompare={() => onToggleCompare(c.courseCode)}
-            selectedCats={selectedCats}
-          />
-        ))}
-      </tbody>
-    </table>
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <table
+          className="w-full text-[13.5px]"
+          style={{
+            borderCollapse: "separate",
+            borderSpacing: 0,
+            background: "var(--color-surface)",
+          }}
+        >
+          <thead>
+            <tr>
+              <Th
+                col="code"
+                label="Course"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onSort={onSort}
+              />
+              <Th
+                col="title"
+                label="Title"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onSort={onSort}
+              />
+              <Th
+                col="units"
+                label="Units"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onSort={onSort}
+              />
+              <Th
+                col="matches"
+                label="GE Categories"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onSort={onSort}
+              />
+              <th
+                className="text-left text-xs font-medium tracking-[0.04em] uppercase px-4 py-3.5 border-b sticky top-0 z-[1]"
+                style={{
+                  color: "var(--color-text-muted)",
+                  background: "var(--color-surface)",
+                  borderColor: "var(--color-border)",
+                  cursor: "default",
+                }}
+              >
+                Description
+              </th>
+              <th
+                className="border-b sticky top-0 z-[1]"
+                style={{
+                  width: 80,
+                  background: "var(--color-surface)",
+                  borderColor: "var(--color-border)",
+                  cursor: "default",
+                }}
+              />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((c) => (
+              <CourseRow
+                key={c.courseCode}
+                course={c}
+                expanded={expanded.has(c.courseCode)}
+                onToggle={() => onToggleExpand(c.courseCode)}
+                inCompare={compare.includes(c.courseCode)}
+                onCompare={() => onToggleCompare(c.courseCode)}
+                selectedCats={selectedCats}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* attribution footer */}
+      <div
+        className="flex items-center justify-end px-4 border-t"
+        style={{
+          height: 32,
+          borderColor: "var(--color-border)",
+          background: "var(--color-surface)",
+          fontSize: 11.5,
+          color: "var(--color-text-muted)",
+          flexShrink: 0,
+        }}
+      >
+        Data from{" "}
+        <a
+          href="https://icssc.link/about-anteaterapi"
+          target="_blank"
+          rel="noreferrer"
+          className="ml-1 underline underline-offset-2 transition-colors"
+          style={{ color: "var(--color-accent)" }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.color = "var(--color-accent-2)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.color = "var(--color-accent)")
+          }
+        >
+          Anteater API
+        </a>
+      </div>
+    </div>
   );
 }

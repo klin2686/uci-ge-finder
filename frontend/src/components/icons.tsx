@@ -80,27 +80,32 @@ export const IconMoon = (p: IconProps) => (
 );
 export const IconHat = (p: IconProps) => (
   <Icon {...p}>
-    <path d="M2 9l10-4 10 4-10 4-10-4z" />
-    <path d="M6 11v4c0 1.5 2.7 3 6 3s6-1.5 6-3v-4" />
+    <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+    <path d="M22 10v6" />
+    <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
   </Icon>
 );
 export const IconCompare = (p: IconProps) => (
   <Icon {...p}>
-    <rect x="3" y="5" width="7" height="14" rx="1.5" />
-    <rect x="14" y="5" width="7" height="14" rx="1.5" />
-    <path d="M10 10h4M10 14h4" strokeWidth={1.2} />
+    <path d="m16 3 4 4-4 4" />
+    <path d="M20 7H4" />
+    <path d="m8 21-4-4 4-4" />
+    <path d="M4 17h16" />
   </Icon>
 );
 export const IconReq = (p: IconProps) => (
   <Icon {...p}>
-    <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-    <path d="M14 3v6h6M9 13h6M9 17h4" />
+    <path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z" />
+    <path d="M8 12h8" />
   </Icon>
 );
 export const IconPrereq = (p: IconProps) => (
   <Icon {...p}>
-    <path d="M4 6h11M4 18h11" />
-    <path d="M17 4l3 2-3 2M17 16l3 2-3 2" />
+    <path d="M13 5h8" />
+    <path d="M13 12h8" />
+    <path d="M13 19h8" />
+    <path d="m3 17 2 2 4-4" />
+    <path d="m3 7 2 2 4-4" />
   </Icon>
 );
 export const IconSparkle = (p: IconProps) => (

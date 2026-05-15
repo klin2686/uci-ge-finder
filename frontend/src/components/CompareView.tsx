@@ -71,7 +71,7 @@ export function CompareView({
             Nothing to compare yet
           </h3>
           <p className="mt-1.5 max-w-[380px] text-[13.5px]">
-            Add courses from Browse (up to 4) to see them side-by-side —
+            Add courses from Browse (up to 4) to see them side-by-side,
             including which GE categories they share, prerequisites, and
             enrollment notes.
           </p>

@@ -7,6 +7,7 @@ interface Props {
   value: CategoryId | undefined;
   otherValue: CategoryId | undefined;
   placeholder: string;
+  alignRight?: boolean;
   onChange: (v: CategoryId | null) => void;
 }
 
@@ -14,6 +15,7 @@ export function CategorySelect({
   value,
   otherValue,
   placeholder,
+  alignRight,
   onChange,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -80,7 +82,7 @@ export function CategorySelect({
 
       {open && (
         <div
-          className="absolute top-[calc(100%+6px)] left-0 min-w-full z-20 rounded-xl border p-1.5 overflow-y-auto"
+          className={`absolute top-[calc(100%+6px)] ${alignRight ? "right-0" : "left-0"} min-w-full z-20 rounded-xl border p-1.5 overflow-y-auto`}
           style={{
             width: 300,
             background: "var(--color-surface)",

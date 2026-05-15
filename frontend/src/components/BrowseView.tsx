@@ -152,6 +152,7 @@ export function BrowseView({
               value={cats[1]}
               otherValue={cats[0]}
               placeholder="Second GE category"
+              alignRight
               onChange={handleCat1Change}
             />
           </>
@@ -217,21 +218,22 @@ export function BrowseView({
             {sorted.length === 1 ? "course" : "courses"}
           </span>
         </div>
-        {hasFilter && (
-          <button
-            onClick={onClearFilters}
-            className="text-[12.5px] px-2.5 py-1.5 rounded-[6px] transition-colors"
-            style={{ color: "var(--color-text-muted)" }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "var(--color-hover)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
-          >
-            Clear all
-          </button>
-        )}
+        <button
+          onClick={onClearFilters}
+          className="text-[12.5px] px-2.5 py-1.5 rounded-[6px] transition-colors"
+          style={{
+            color: "var(--color-text-muted)",
+            visibility: hasFilter ? "visible" : "hidden",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.background = "var(--color-hover)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background = "transparent")
+          }
+        >
+          Clear all
+        </button>
       </div>
 
       {!isMobile && (

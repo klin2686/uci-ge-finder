@@ -9,7 +9,13 @@ interface Props {
   onCompare: () => void;
 }
 
-export function CompareBar({ compare, courses, isMobile, onClear, onCompare }: Props) {
+export function CompareBar({
+  compare,
+  courses,
+  isMobile,
+  onClear,
+  onCompare,
+}: Props) {
   if (compare.length === 0) return null;
 
   return (

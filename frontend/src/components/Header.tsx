@@ -20,8 +20,10 @@ export function Header({
 }: Props) {
   return (
     <header
-      className="flex items-center justify-between sticky top-0 z-10 border-b"
+      className="grid sticky top-0 z-10 border-b"
       style={{
+        gridTemplateColumns: isMobile ? "1fr auto" : "1fr auto 1fr",
+        alignItems: "center",
         padding: isMobile ? "12px 16px" : "14px 24px",
         background: "var(--color-bg)",
         borderColor: "var(--color-border)",
@@ -91,7 +93,7 @@ export function Header({
       )}
 
       {/* right: theme toggle */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 justify-self-end">
         <button
           onClick={onThemeToggle}
           aria-label="Toggle color theme"

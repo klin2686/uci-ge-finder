@@ -124,6 +124,7 @@ function GEFinderApp() {
         <CompareBar
           compare={state.compare}
           courses={compareBarCourses}
+          isMobile={isMobile}
           onClear={() => set({ compare: [] })}
           onCompare={() => set({ view: "compare" })}
         />

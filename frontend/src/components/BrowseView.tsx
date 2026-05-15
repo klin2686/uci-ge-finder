@@ -6,7 +6,6 @@ import { CourseCard } from "./CourseCard";
 import { CategorySelect } from "./CategorySelect";
 import { FilterSheet } from "./FilterSheet";
 import { SortSheet } from "./SortSheet";
-import { CatBadge } from "./CatBadge";
 import { EmptyHero } from "./EmptyHero";
 import { NoResults } from "./NoResults";
 import { IconSearch, IconClose, IconFilter, IconSort } from "./icons";
@@ -77,7 +76,7 @@ export function BrowseView({
       <div
         className="flex gap-3 items-stretch"
         style={{
-          padding: isMobile ? "14px 16px 0" : "18px 24px 0",
+          padding: isMobile ? "14px 16px 4px" : "18px 24px 0",
           flexDirection: isMobile ? "column" : "row",
         }}
       >
@@ -85,6 +84,7 @@ export function BrowseView({
         <label
           className="flex-1 flex items-center gap-2.5 rounded-xl border h-12 px-3.5 transition-all"
           style={{
+            minHeight: isMobile ? 40 : undefined,
             background: "var(--color-surface)",
             borderColor: "var(--color-border)",
           }}
@@ -160,7 +160,7 @@ export function BrowseView({
 
       {/* mobile tools row */}
       {isMobile && (
-        <div style={{ padding: "8px 16px 0" }}>
+        <div style={{ padding: "6px 16px 0" }}>
           <div className="flex gap-2 items-center flex-wrap">
             <PillBtn
               active={cats.length > 0}
@@ -216,31 +216,6 @@ export function BrowseView({
             </strong>{" "}
             {sorted.length === 1 ? "course" : "courses"}
           </span>
-          {!isMobile && cats.length > 0 && (
-            <div className="flex gap-1.5 flex-wrap">
-              {cats.map((cid) => (
-                <span
-                  key={cid}
-                  className="inline-flex items-center gap-1 rounded-full border text-[12px] font-medium"
-                  style={{
-                    padding: "3px 4px 3px 10px",
-                    background: "var(--color-accent-bg)",
-                    borderColor: "var(--color-accent-bd)",
-                    color: "var(--color-accent-2)",
-                  }}
-                >
-                  fulfills <CatBadge id={cid} matched />
-                  <button
-                    onClick={() => onCats(cats.filter((x) => x !== cid))}
-                    className="w-[18px] h-[18px] grid place-items-center rounded-full opacity-70 hover:opacity-100"
-                    aria-label={`Remove ${cid}`}
-                  >
-                    <IconClose className="w-2.5 h-2.5" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
         </div>
         {hasFilter && (
           <button

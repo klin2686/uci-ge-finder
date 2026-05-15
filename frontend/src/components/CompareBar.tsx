@@ -4,11 +4,12 @@ import { IconChevR } from "./icons";
 interface Props {
   compare: string[];
   courses: Course[];
+  isMobile: boolean;
   onClear: () => void;
   onCompare: () => void;
 }
 
-export function CompareBar({ compare, courses, onClear, onCompare }: Props) {
+export function CompareBar({ compare, courses, isMobile, onClear, onCompare }: Props) {
   if (compare.length === 0) return null;
 
   return (
@@ -26,7 +27,7 @@ export function CompareBar({ compare, courses, onClear, onCompare }: Props) {
         style={{ color: "var(--color-text-2)" }}
       >
         <div className="flex">
-          {courses.map((c, i) => (
+          {courses.slice(0, isMobile ? 2 : 4).map((c, i) => (
             <span
               key={c.courseCode}
               className="w-[30px] h-[30px] rounded-[8px] border grid place-items-center font-mono text-[10px] font-semibold"

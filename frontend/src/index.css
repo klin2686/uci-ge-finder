@@ -1,0 +1,151 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+@import "tailwindcss";
+
+/* ── design tokens (dark default) ── */
+@theme {
+  --font-sans:
+    "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-bg: oklch(0.16 0.005 250);
+  --color-bg-2: oklch(0.2 0.006 250);
+  --color-surface: oklch(0.215 0.007 250);
+  --color-surface-2: oklch(0.25 0.008 250);
+  --color-border: oklch(0.3 0.01 250);
+  --color-border-2: oklch(0.36 0.012 250);
+  --color-hover: oklch(0.27 0.01 250);
+
+  --color-text: oklch(0.965 0.004 250);
+  --color-text-2: oklch(0.78 0.008 250);
+  --color-text-muted: oklch(0.6 0.01 250);
+  --color-text-faint: oklch(0.46 0.01 250);
+
+  --color-accent: oklch(0.78 0.155 250);
+  --color-accent-2: oklch(0.84 0.13 250);
+  --color-accent-bg: oklch(0.78 0.155 250 / 0.16);
+  --color-accent-bd: oklch(0.78 0.155 250 / 0.45);
+}
+
+/* ── light mode token overrides ── */
+[data-theme="light"] {
+  --color-bg: oklch(0.985 0.003 250);
+  --color-bg-2: oklch(0.975 0.004 250);
+  --color-surface: oklch(1 0 0);
+  --color-surface-2: oklch(0.97 0.004 250);
+  --color-border: oklch(0.91 0.006 250);
+  --color-border-2: oklch(0.86 0.008 250);
+  --color-hover: oklch(0.955 0.005 250);
+
+  --color-text: oklch(0.2 0.01 250);
+  --color-text-2: oklch(0.34 0.01 250);
+  --color-text-muted: oklch(0.5 0.01 250);
+  --color-text-faint: oklch(0.62 0.01 250);
+
+  --color-accent: oklch(0.52 0.19 250);
+  --color-accent-2: oklch(0.45 0.2 250);
+  --color-accent-bg: oklch(0.52 0.19 250 / 0.1);
+  --color-accent-bd: oklch(0.52 0.19 250 / 0.35);
+}
+
+/* ── base resets ── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+  }
+
+  input,
+  select {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-2);
+  }
+}
+
+/* ── badge palette helpers (per-category hue) ── */
+:root {
+  --bdg-l-bg: 0.275;
+  --bdg-c-bg: 0.045;
+  --bdg-l-bd: 0.42;
+  --bdg-c-bd: 0.085;
+  --bdg-l-fg: 0.86;
+  --bdg-c-fg: 0.075;
+}
+[data-theme="light"] {
+  --bdg-l-bg: 0.96;
+  --bdg-c-bg: 0.03;
+  --bdg-l-bd: 0.86;
+  --bdg-c-bd: 0.06;
+  --bdg-l-fg: 0.38;
+  --bdg-c-fg: 0.12;
+}
+
+/* ── sheet animations ── */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.animate-fade-in {
+  animation: fade-in 0.18s ease-out;
+}
